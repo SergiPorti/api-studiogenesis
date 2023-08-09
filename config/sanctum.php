@@ -46,7 +46,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => 2880,
+    'purge_expired_tokens' => true,
 
     /*
     |--------------------------------------------------------------------------
