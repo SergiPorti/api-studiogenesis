@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('api_auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/update-password', [AuthController::class, 'updatePassword']);
+    Route::post('/loginToken', [AuthController::class, 'loginByToken']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);

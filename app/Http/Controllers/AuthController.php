@@ -32,6 +32,27 @@ class AuthController extends Controller
                 'message' => 'S\'ha accedit correctament al compte', 'token' => $token,
                 'username' => $user->username,
                 'email' => $user->email,
+                'lastname' => $user->lastname,
+                'birthdate' => $user->birthdate,
+                'name' => $user->name
+            ]
+        ], 200);
+    }
+
+    public function loginByToken(Request $request)
+    {
+        //TODO: Verificacio del USER VIA TOKEN
+        
+        
+        $user = User::where('email', $request->email)
+            ->orWhere('username', $request->username)->first();
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            "data" => [
+                'message' => 'S\'ha accedit correctament al compte', 'token' => $token,
+                'username' => $user->username,
+                'email' => $user->email,
             ]
         ], 200);
     }
