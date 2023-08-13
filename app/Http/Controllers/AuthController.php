@@ -14,6 +14,7 @@ class AuthController extends Controller
     {
         //TODO: Falta tractament de foto en el model
         //TODO: Creacio de foto en el model
+        dd($request);
         $request->validate([
             'email' => 'filled|string|email',
             'username' => 'filled|string',
@@ -29,30 +30,36 @@ class AuthController extends Controller
 
         return response()->json([
             "data" => [
-                'message' => 'S\'ha accedit correctament al compte', 'token' => $token,
-                'username' => $user->username,
-                'email' => $user->email,
-                'lastname' => $user->lastname,
-                'birthdate' => $user->birthdate,
-                'name' => $user->name
+                "token" => $token,
+                "user" => [
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'lastname' => $user->lastname,
+                    'birthdate' => $user->birthdate,
+                    'name' => $user->name
+                ]
             ]
         ], 200);
     }
 
     public function loginByToken(Request $request)
     {
-        //TODO: Verificacio del USER VIA TOKEN
-        
-        
-        $user = User::where('email', $request->email)
-            ->orWhere('username', $request->username)->first();
+        if (!auth()->user()) {
+            return response()->json(["error_message" => "Usuari no autentificat", "message" => "Usuari no autentificat"], 401);
+        }
+        $user = auth()->user();
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
             "data" => [
-                'message' => 'S\'ha accedit correctament al compte', 'token' => $token,
-                'username' => $user->username,
-                'email' => $user->email,
+                "token" => $token,
+                "user" => [
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'lastname' => $user->lastname,
+                    'birthdate' => $user->birthdate,
+                    'name' => $user->name
+                ]
             ]
         ], 200);
     }
@@ -68,6 +75,12 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(["error_message" => $e, "message" => "Error al restablir la contrassenya"], 500);
         }
+    }
+
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        return response()->json(["data" => "Sessió tancada correctament"], 200);
     }
 
     public function register(Request $request)
