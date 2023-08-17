@@ -10,19 +10,18 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+
+
     public function login(Request $request)
     {
-        //TODO: Falta tractament de foto en el model
-        //TODO: Creacio de foto en el model
-        dd($request);
         $request->validate([
             'email' => 'filled|string|email',
             'username' => 'filled|string',
-            'password' => 'required|string',
+            'password' => 'required|string|confirmed',
         ]);
 
         if (!Auth::attempt($request->only('email', 'username', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(["data" => ['message' => 'Invalid credentials']], 401);
         }
         $user = User::where('email', $request->email)
             ->orWhere('username', $request->username)->first();
@@ -30,36 +29,9 @@ class AuthController extends Controller
 
         return response()->json([
             "data" => [
-                "token" => $token,
-                "user" => [
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'lastname' => $user->lastname,
-                    'birthdate' => $user->birthdate,
-                    'name' => $user->name
-                ]
-            ]
-        ], 200);
-    }
-
-    public function loginByToken(Request $request)
-    {
-        if (!auth()->user()) {
-            return response()->json(["error_message" => "Usuari no autentificat", "message" => "Usuari no autentificat"], 401);
-        }
-        $user = auth()->user();
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            "data" => [
-                "token" => $token,
-                "user" => [
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'lastname' => $user->lastname,
-                    'birthdate' => $user->birthdate,
-                    'name' => $user->name
-                ]
+                'message' => 'S\'ha accedit correctament al compte',
+                'token' => $token,
+                'user' => $user
             ]
         ], 200);
     }
@@ -67,20 +39,28 @@ class AuthController extends Controller
     public function updatePassword(Request $request)
     {
         try {
-            $newPassword = $request->get('password');
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-            auth()->user()->update(['password' => Hash::make($newPassword)]);
+            if ($validator->fails()) {
+                return response()->json(["data" => ['error_message' => $validator->errors(), 'message' => 'Error al actualitzar la contrassenya']], 422);
+            }
+            $user = $request->user();
+            $user->update([
+                'password' => Hash::make($request->get('password'))
+            ]);
 
-            return response()->json(['data' => 'Contrassenya restablerta correctament'], 200);
+            return response()->json(['data' => ["message" => 'Contrassenya restablerta correctament']], 200);
         } catch (\Exception $e) {
-            return response()->json(["error_message" => $e, "message" => "Error al restablir la contrassenya"], 500);
+            return response()->json(["data" => ["error_message" => $e, "message" => "Error al restablir la contrassenya"]], 500);
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        auth()->user()->tokens()->delete();
-        return response()->json(["data" => "Sessió tancada correctament"], 200);
+        $request->user()->tokens()->delete();
+        return response()->json(["data" => ["message" => "Sessió tancada correctament"]], 200);
     }
 
     public function register(Request $request)
@@ -92,11 +72,11 @@ class AuthController extends Controller
                 'birthdate' => 'required|string',
                 'username' => 'required|string',
                 'email' => 'required|email|unique:users',
-                'password' => 'required|string|min:8',
+                'password' => 'required|string|min:8|confirmed',
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['error_message' => $validator->errors(), 'message' => 'Error al registrarse'], 422);
+                return response()->json(["data" => ['error_message' => $validator->errors(), 'message' => 'Error al registrarse']], 422);
             }
             $validatedData = $request->all();
             $validatedData['password'] = Hash::make($validatedData['password']);
@@ -106,14 +86,13 @@ class AuthController extends Controller
 
             return response()->json([
                 "data" => [
-                    'message' => 'Se ha creado el usuario correctamente',
+                    'message' => 'Usuari creat correctament',
                     'token' => $token,
-                    'username' => $request->get('username'),
-                    'email' => $request->get('email')
+                    'user' => $user,
                 ]
-            ], 201);
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error_message' => $e, 'message' => 'Error al crear l\'usuari, el correu electrònic o el nom ja estan en ús'], 500);
+            return response()->json(["data" => ['error_message' => $e, 'message' => 'Error al crear l\'usuari, el correu electrònic o el nom ja estan en ús']], 500);
         }
     }
 }
