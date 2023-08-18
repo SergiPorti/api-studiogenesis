@@ -20,7 +20,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(["data" => ['error_message' => $validator->errors(), 'message' => 'Error al registrarse']], 422);
+            return response()->json(["data" => ['error_message' => $validator->errors(), 'message' => 'Error al actualitzar']], 422);
         }
 
         $user = $request->user();
@@ -30,7 +30,7 @@ class UserController extends Controller
                 $user->image = $this->uploadFile($request->file('image'));
                 $user->save();
             }
-            return response()->json(['data' => $user], 200);
+            return response()->json(['data' => ["user" => $user]], 200);
         }
 
         return response()->json(["data" => ['message' => 'Error al actualizar']], 422);

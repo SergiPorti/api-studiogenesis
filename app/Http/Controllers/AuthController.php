@@ -51,7 +51,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->get('password'))
             ]);
 
-            return response()->json(['data' => ["message" => 'Contrassenya restablerta correctament']], 200);
+            return response()->json(['data' => ["message" => 'Contrassenya restablerta correctament', "user" => $user]], 200);
         } catch (\Exception $e) {
             return response()->json(["data" => ["error_message" => $e, "message" => "Error al restablir la contrassenya"]], 500);
         }

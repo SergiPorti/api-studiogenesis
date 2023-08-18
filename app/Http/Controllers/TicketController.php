@@ -21,10 +21,10 @@ class TicketController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'nullable|string',
-            'description' => 'nullable|string',
-            'event_date' => 'nullable|string',
-            'price' => 'nullable',
+            'name' => 'required|string',
+            'description' => 'required|string',
+            'event_date' => 'required|string',
+            'price' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -33,6 +33,7 @@ class TicketController extends Controller
         $data = $request->all();
         $data['user_id'] = $request->user()->id;
         $ticket = Ticket::create($data);
+
 
         if ($ticket) {
             if ($request->has('images')) {
@@ -47,7 +48,7 @@ class TicketController extends Controller
                     $image->save();
                 }
             }
-            return response()->json(["data" => ['message' => 'Ticket creat correctament']], 200);
+            return response()->json(["data" => ['message' => 'Ticket creat correctament', "ticket" => $ticket]], 200);
         }
 
         return response()->json(["data" => ['message' => 'Error al crear el ticket']], 500);
@@ -84,7 +85,7 @@ class TicketController extends Controller
         }
 
         if ($ticket) {
-            return response()->json(["data" => ['message' => 'Tiquet creat correctament']], 200);
+            return response()->json(["data" => ['message' => 'Tiquet actualitzat correctament']], 200);
         }
 
         return response()->json(["data" => ['message' => 'Error al crear el tiquet']], 500);
