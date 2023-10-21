@@ -4,4 +4,4 @@
 
 Tenir en compte que s'ha de tindre el composer instal·lat junt PHP. Jo he utilitzat DBeaver per el tema de consulta a la DB creada.
 
-<code>php artisan serve]</code> per aixecar el servidor.
+<code>php artisan serve</code> per aixecar el servidor.
